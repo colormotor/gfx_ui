@@ -112,6 +112,9 @@ namespace ui
     /// Highlights a dragger
     void highlightDragger( const ImVec2& pos, float size=-1.  );
     
+    /// Draw a line from a to b
+    void line( const ImVec2& a, const ImVec2& b );
+
     /// Angle handle widget
     float handle( int index, float ang, const ImVec2& pos, float length, bool selected=false );
     

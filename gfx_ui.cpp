@@ -176,7 +176,12 @@ namespace ui
         drawDragger(window, rect, config.selectedColor);
         //window->DrawList->AddRectFilled(rect.Min, rect.Max, config.selectedColor, config.rounding); //, rounding);
     }
-    
+
+    void line( const ImVec2& a, const ImVec2& b )
+    {
+        ImGui::GetCurrentWindow()->DrawList->AddLine(a, b, config.lineColor);
+    }
+
     static ImVec2 handlePos( const ImVec2& pos, float theta, float length )
     {
         return ImVec2(pos.x + cos(theta)*length, pos.y + sin(theta)*length);
@@ -410,6 +415,8 @@ namespace ui
                                  ImVec2(0,100), // Y axis (expected orthogonal)
                                  ImVec2(200,500)); // position
 
+        static ImVec2 p1(300,300), p2(500,300), c1(350,200), c2(450,200);
+
         if(first)
         {
             for( int i = 0; i < 7; i++ )
@@ -422,6 +429,15 @@ namespace ui
         ui::begin("demo");
         ImGuiWindow *win= ImGui::GetCurrentWindow();
 
+        // Edit bezier curve
+        p1 = ui::dragger( -100, p1);
+        p2 = ui::dragger( -101, p2);
+        c1 = ui::dragger( -102, c1);
+        c2 = ui::dragger( -103, c2);
+        ui::line(p1,c1);
+        ui::line(p2,c2);
+        win->DrawList->AddBezierCurve(p1, c1, c2, p2, 0xffff0000, 2.);
+        
         // Edit an angle (arc test)
         arcPos = ui::dragger(pts.size(), /*numeric id starts at pts.size so we don't conflict with next ones*/ 
                              arcPos, false, 10.);
