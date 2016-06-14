@@ -53,6 +53,11 @@ which can be used to switch between "editing states".
 The icons of the toolbar are created as a TrueType font. By default the code contains and loads the binary data for a number of basic Icons (e.g selection, "pencil", load, save, etc... ). And each Icon is specified in a string, as the corresponding character. For example the previous example crates an arrow icon ('a') and a pencil icon ('b'). A nice tool for creating custom icon fonts is the [Fontello](http://fontello.com) website.
 The toolbar does not necessarily need to called between the `ui::begin`,`ui::end`.
 
+### Configuration
+Similarly to ImGui, you can define custom constructors and cast operators for the `ui::Rect` and `ui::Trans2d` structs, which are used for selection and affine transforms respectively.
+
+### UI Focus
+Currently, because gfx_ui is using a "full screen" window to handle interaction, code that uses IMGUI's `io.WantCaptureMouse` should use `ui::hasFocus()` instead. 
 ## Demo
 The code comes with a demo (currently tested only on Mac). To run the demo just place the repository folder at the same directory level as the IMGUI examples, cd to the folder, and then
 
