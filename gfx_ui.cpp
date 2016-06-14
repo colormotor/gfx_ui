@@ -501,15 +501,16 @@ namespace ui
             win->DrawList->AddLine(pts[i], pts[i+1], 0xff555555);
         }
 
-        ui::end();
-        
-        // A toolbar can be used to switch states, 
+         // A toolbar can be used to switch states, 
         // the letters in the second parameter correspond with the ascii codes 
         // for symbols in the loaded font (iconFont), which is set when calling ui::init
         state = ui::toolbar("state","ab",state);
         // Show characters corresponding to each Icon in the font
         static int foo = 0;
         foo = ui::toolbar("Default icons, hover to view the corresponding character","abcdefg123456789",foo, true, true);
+        ui::end();
+        
+       
     }
 
     size_t gfx_font_size=9464;

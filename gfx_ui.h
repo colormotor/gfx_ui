@@ -124,7 +124,7 @@ namespace ui
     /// Returns current mouse delta
     ImVec2 dragDelta();
     
-    /// Creates a font-icon toolbar, for now should be called outside of the begin - end block
+    /// Creates a font-icon toolbar (not necessary to call between begin and end)
     int toolbar( const std::string& title, const std::string& items, int selectedItem, bool horizontal=false, bool showAscii=false );
     
     void demo();   
