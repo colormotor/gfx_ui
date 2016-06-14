@@ -8,6 +8,8 @@ Currently handles these features:
 *  Rect selection
 *  Icon toolbars
 
+![alt tag](https://raw.githubusercontent.com/colormotor/gfx_ui/master/shot.jpg)
+
 ## Basic Usage
 ### Initialization
 Call ```ui::init()``` **after** the main IMGUI font has been loaded and **before** the texture atlas has been created (refer to the IMGUI instructions for more details), for example:
