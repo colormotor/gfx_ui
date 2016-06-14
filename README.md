@@ -49,10 +49,10 @@ The geometric manipulation widgets should be called between a `ui::begin` and `u
 The library contains a function to create a toolbar
 
 ```
-state = ui::toolbar("state","ab",state);
+state = ui::toolbar("a toolbar","ab",state);
 ```
 which can be used to switch between "editing states". 
-The icons of the toolbar are created as a TrueType font. By default the code contains and loads the binary data for a number of basic Icons (e.g selection, "pencil", load, save, etc... ). And each Icon is specified in a string, as the corresponding character. For example the previous example crates an arrow icon ('a') and a pencil icon ('b'). A nice tool for creating custom icon fonts is the [Fontello](http://fontello.com) website.
+The icons of the toolbar are created as a TrueType font. By default the code contains and loads the binary data for a number of basic Icons (e.g selection, "pencil", load, save, etc... ). And each Icon is specified in a string, as the corresponding character. For example the previous example crates an arrow icon ('a') and a pencil icon ('b'). A nice tool for creating custom icon fonts (and that I used to make the embedded font) is the [Fontello](http://fontello.com) website.
 The toolbar does not necessarily need to called between the `ui::begin`,`ui::end`.
 
 ### Configuration
