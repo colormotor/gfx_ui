@@ -437,7 +437,7 @@ namespace ui
         ui::line(p1,c1);
         ui::line(p2,c2);
         win->DrawList->AddBezierCurve(p1, c1, c2, p2, 0xffff0000, 2.);
-        
+
         // Edit an angle (arc test)
         arcPos = ui::dragger(pts.size(), /*numeric id starts at pts.size so we don't conflict with next ones*/ 
                              arcPos, false, 10.);
@@ -521,9 +521,11 @@ namespace ui
         // the letters in the second parameter correspond with the ascii codes 
         // for symbols in the loaded font (iconFont), which is set when calling ui::init
         state = ui::toolbar("state","ab",state);
-        // Show characters corresponding to each Icon in the font
+        
+        // This shows characters corresponding to each icon in the font
         static int foo = 0;
         foo = ui::toolbar("Default icons, hover to view the corresponding character","abcdefg123456789",foo, true, true);
+        
         ui::end();
         
        
