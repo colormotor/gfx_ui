@@ -362,7 +362,10 @@ namespace ui
         else
             size = ImVec2(iconSize,iconSize*items.length());
         //ImGui::SetNextWindowSize(size);
-        ImGui::Begin(title.c_str(), NULL, size, -1.0f,  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize );
+        int flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
+        if(!horizontal)
+            flags |= ImGuiWindowFlags_NoTitleBar;
+        ImGui::Begin(title.c_str(), NULL, size, -1.0f, flags);
         ImGui::PushID(title.c_str());
         ImGui::PushFont(iconFont);
     
