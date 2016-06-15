@@ -73,7 +73,7 @@ namespace ui
             draggerSize = 4.0;
             lineColor = 0xff666666;
             hoverColor = 0xff0000ff;
-            selectedColor = 0xff00ffff;
+            selectedColor = 0xff0044ff;
             color=0xff666666;
         }
 

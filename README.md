@@ -61,7 +61,7 @@ Similarly to ImGui, you can define custom constructors and cast operators for th
 ### UI Focus
 Currently, because gfx_ui is using a "full screen" window to handle interaction, code that uses IMGUI's `io.WantCaptureMouse` should use `ui::hasFocus()` instead. 
 ## Demo
-The code comes with a demo (currently tested only on Mac). To run the demo just place the repository folder at the same directory level as the IMGUI examples, cd to the folder, and then
+gfx_ui comes with a demo (currently tested only on Mac). To run the demo just place the repository folder at the same directory level as the IMGUI examples, cd to the folder, and then
 
 ```
 make;

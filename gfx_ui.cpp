@@ -118,8 +118,6 @@ namespace ui
         const ImGuiID id = window->GetID(idstr.str().c_str());
         const float w = ImGui::CalcItemWidth();
         
-        // Interaction first, helps with lag
-        // Need to check what is the best logic here
         bool res = false;
         if(g.ActiveId == id)
         {
@@ -144,16 +142,14 @@ namespace ui
         
         // Check hovered
         const bool hovered = ImGui::IsHovered(rect, id);
-        
         if (hovered)
         {
             ImGui::SetHoveredID(id);
-        }
-            
-        if (hovered && g.IO.MouseClicked[0])
-        {
-            ImGui::SetActiveID(id, window);
-            ImGui::FocusWindow(window);
+            if(g.IO.MouseClicked[0])
+            {
+                ImGui::SetActiveID(id, window);
+                ImGui::FocusWindow(window);
+            }
         }
         
         // Draw
@@ -203,8 +199,6 @@ namespace ui
         const ImGuiID id = window->GetID(idstr.str().c_str());
         const float w = ImGui::CalcItemWidth();
         
-        // Interaction first, helps with lag
-        // Need to check what is the best logic here
         bool res = false;
         if(g.ActiveId == id)
         {
@@ -232,12 +226,11 @@ namespace ui
         if (hovered)
         {
             ImGui::SetHoveredID(id);
-        }
-        
-        if (hovered && g.IO.MouseClicked[0])
-        {
-            ImGui::SetActiveID(id, window);
-            ImGui::FocusWindow(window);
+            if(g.IO.MouseClicked[0])
+            {
+                ImGui::SetActiveID(id, window);
+                ImGui::FocusWindow(window);
+            }
         }
         
         // Draw
@@ -288,9 +281,9 @@ namespace ui
             return t;
         
         bool pmod=false, xmod=false, ymod=false;
-        ImGui::PushID(idstr.str().c_str());
-        
         ImVec2 px, py;
+        
+        ImGui::PushID(idstr.str().c_str());
         
         // position
         t.pos = dragger(0, t.pos, selected, config.draggerSize ); pmod = modified();
@@ -346,9 +339,8 @@ namespace ui
         
         if(ImGui::IsMouseDragging() && dragging)
         {
-            printf("Dragging\n");
             mod = true;
-            return makeFlipRect(clickp, ImGui::GetMousePos()); //clickp+ImGui::GetMouseDragDelta());
+            return makeFlipRect(clickp, ImGui::GetMousePos());
         }
         
         if(ImGui::IsMouseReleased(0))
