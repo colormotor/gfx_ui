@@ -20,6 +20,7 @@
 #pragma once
 #include "imgui.h"
 #include "gfx_ui_config.h"
+#include <stdlib.h>
 #include <vector>
 #include <string>
 #include <sstream>
