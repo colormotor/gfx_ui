@@ -22,6 +22,7 @@
 #include "gfx_ui.h"
 
 // IM dragger interface
+
 namespace ui
 {
     Config config;
@@ -53,6 +54,10 @@ namespace ui
     bool hasFocus()
     {
         ImGuiContext& g = *GImGui;
+        
+        // maintains cross compatibility with ImGui
+        if(!g.IO.WantCaptureMouse)
+            return false;
         
         if( g.HoveredWindow == uiWindow && g.HoveredIdPreviousFrame == 0 && g.HoveredId==0 && g.ActiveId==0 )
         {
@@ -204,7 +209,7 @@ namespace ui
         {
             if (g.IO.MouseDown[0])
             {
-                ang = atan2( ImGui::GetMousePos().y - pos.y, ImGui::GetMousePos().x - pos.x );
+                ang = ::atan2( ImGui::GetMousePos().y - pos.y, ImGui::GetMousePos().x - pos.x );
                 res=mod=true;
             }
             else
@@ -361,12 +366,14 @@ namespace ui
             size = ImVec2(iconSize*items.length(), iconSize);
         else
             size = ImVec2(iconSize,iconSize*items.length());
-        //ImGui::SetNextWindowSize(size);
-        int flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
-        if(!horizontal)
-            flags |= ImGuiWindowFlags_NoTitleBar;
-        ImGui::Begin(title.c_str(), NULL, size, -1.0f, flags);
+
+        int flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
         ImGui::PushID(title.c_str());
+        if(horizontal)
+            ImGui::Begin(title.c_str(), NULL, size, -1.0f, flags);
+        else
+            ImGui::Begin("  ", NULL, size, -1.0f, flags);
+        
         ImGui::PushFont(iconFont);
     
         int sel = selectedItem;
@@ -389,8 +396,8 @@ namespace ui
         }
         
         ImGui::PopFont();
-        ImGui::PopID();
         ImGui::End();
+        ImGui::PopID();
         
         return sel;
     }
@@ -1480,4 +1487,3 @@ namespace ui
     
 
 }
-

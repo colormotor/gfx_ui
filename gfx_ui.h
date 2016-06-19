@@ -101,7 +101,7 @@ namespace ui
     void init( float iconSize=20.0, const std::string& iconFontPath="");
     
     /// The UI should be called withing these begin end blocks
-    void begin( const std::string& name="ui" );
+    void begin( const std::string& name="gfx_ui" );
     void end();
     
     /// Will return true if the previous widget call has caught an interaction
