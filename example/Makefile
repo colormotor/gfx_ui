@@ -29,7 +29,7 @@ endif
 ifeq ($(UNAME_S), Darwin) #APPLE
 	ECHO_MESSAGE = "Mac OS X"
 	LIBS = -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
-	LIBS += -L/usr/local/lib -lglfw3
+	LIBS += -L/usr/local/lib -lglfw
 
 	CXXFLAGS = -I../../../ -I/usr/local/include -I../
 	CXXFLAGS += -Wall -Wformat
