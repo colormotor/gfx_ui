@@ -56,10 +56,12 @@ namespace ui
         ImGuiContext& g = *GImGui;
         
         // maintains cross compatibility with ImGui
-        if(!g.IO.WantCaptureMouse)
+        if(!g.IO.WantCaptureMouse){
             return false;
+        }
         
-        if( g.HoveredWindow == uiWindow && g.HoveredIdPreviousFrame == 0 && g.HoveredId==0 && g.ActiveId==0 )
+        // Allow mouse interaction if over background window
+        if( g.HoveredWindow == uiWindow && g.ActiveId==0 ) //g.HoveredIdPreviousFrame == 0 && g.HoveredId==0 && g.ActiveId==0 )
         {
             return false;
         }
@@ -70,15 +72,31 @@ namespace ui
     void begin( const std::string& name )
     {
         static bool show=true;
-        ImGui::SetNextWindowPos(ImVec2(0,0));
-        ImGui::Begin(name.c_str(),&show, ImGui::GetIO().DisplaySize, 0.0f, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_NoBringToFrontOnFocus);
+        ImGui::PushID(name.c_str());
+        ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always); //, ImGuiCond_FirstUseEver);// ImGui::GetIO().DisplaySize);
+        ImGui::SetNextWindowBgAlpha(0.0); //, ImGuiCond_Always);
+        ImGui::Begin(name.c_str(), &show, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         uiWindow = ImGui::GetCurrentWindow();
+        
+        // Ok, something wrong here because ImGui::SetNextWindowBgAlpha is setting alpha=0 for all windows...
+        ImGui::SetNextWindowBgAlpha(1.0); 
     }
     
     void end()
     {
         ImGui::End();
+        ImGui::PopID();
+    }
+
+    void text( ImVec2 pos, const std::string& str, ImColor clr )
+    {
+        ImU32 color=clr.Value.x>-1?(ImU32)clr:config.textColor;
+        ImGui::PushStyleColor(ImGuiCol_Text, color);
+        ImGui::SetCursorPos(pos);
+        ImGui::Text(str.c_str());
+        ImGui::PopStyleColor();
     }
     
     static ImRect rectFromCircle( const ImVec2& p, float r )
@@ -88,6 +106,8 @@ namespace ui
     }
     
     bool modified() { return mod; }
+    bool modifierShift() { return ImGui::GetIO().KeyShift; }
+    bool modifierAlt() { return ImGui::GetIO().KeyAlt; }
     
     static ImU32 getColor( bool hovered, bool selected )
     {
@@ -142,11 +162,11 @@ namespace ui
         ImRect rect = rectFromCircle(pos, size);
         
         ImGui::ItemSize(rect);
-        if(!ImGui::ItemAdd(rect, &id))
+        if(!ImGui::ItemAdd(rect, id))
             return pos;
         
         // Check hovered
-        const bool hovered = ImGui::IsHovered(rect, id);
+        const bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly); //rect, id);
         if (hovered)
         {
             ImGui::SetHoveredID(id);
@@ -178,18 +198,37 @@ namespace ui
         //window->DrawList->AddRectFilled(rect.Min, rect.Max, config.selectedColor, config.rounding); //, rounding);
     }
 
-    void line( const ImVec2& a, const ImVec2& b )
+    void line( const ImVec2& a, const ImVec2& b, ImColor clr )
     {
-        ImGui::GetCurrentWindow()->DrawList->AddLine(a, b, config.lineColor);
+        ImU32 color=clr.Value.x>-1?(ImU32)clr:config.lineColor;
+        ImGui::GetCurrentWindow()->DrawList->AddLine(a, b, color);
     }
 
     static ImVec2 handlePos( const ImVec2& pos, float theta, float length )
     {
         return ImVec2(pos.x + cos(theta)*length, pos.y + sin(theta)*length);
     }
-                                  
-    float handle( int index, float ang, const ImVec2& pos, float length, bool selected )
+
+
+    static float norm( const ImVec2& v )
     {
+        return ::sqrt( v.x*v.x + v.y*v.y );
+    }
+
+    static float length( const ImVec2& a, const ImVec2& b )
+    {
+        return ::sqrt( (b.x-a.x)*(b.x-a.x) + (b.y-a.y)*(b.y-a.y) );
+    }
+
+    static float angleBetween( const ImVec2& a, const ImVec2& b )
+    {
+        return ::atan2( a.x*b.y - a.y*b.x, a.x*b.x + a.y*b.y );
+    }
+
+
+    ImVec2 lengthHandle( int index, ImVec2 thetaLen, float startTheta, const ImVec2& pos, const ImVec2& minThetaLen, const ImVec2& maxThetaLen, bool selected )
+    {
+        using namespace ui;
         mod = false;
         
         std::stringstream idstr;
@@ -197,19 +236,27 @@ namespace ui
         
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         if (window->SkipItems)
-            return ang;
+            return thetaLen;
         
         ImGuiContext& g = *GImGui;
         const ImGuiStyle& style = g.Style;
         const ImGuiID id = window->GetID(idstr.str().c_str());
         const float w = ImGui::CalcItemWidth();
         
+        ImVec2 vbase = ImVec2(::cos(startTheta), ::sin(startTheta));
+        
         bool res = false;
         if(g.ActiveId == id)
         {
             if (g.IO.MouseDown[0])
             {
-                ang = ::atan2( ImGui::GetMousePos().y - pos.y, ImGui::GetMousePos().x - pos.x );
+                ImVec2 vmouse = ImVec2(ImGui::GetMousePos().x - pos.x, ImGui::GetMousePos().y - pos.y);
+                thetaLen.x = (float)angleBetween(vbase, vmouse); //::atan2( ImGui::GetMousePos().y - pos.y, ImGui::GetMousePos().x - pos.x );
+                
+                if(maxThetaLen.x != 0)
+                    thetaLen.x = std::max( std::min(thetaLen.x, maxThetaLen.x), minThetaLen.x);
+                
+                thetaLen.y = std::max( std::min( length(ImGui::GetMousePos(), pos), maxThetaLen.y ), minThetaLen.y );
                 res=mod=true;
             }
             else
@@ -219,15 +266,15 @@ namespace ui
         }
         
         // Specify object
-        ImVec2 hp = handlePos(pos, ang, length);
-        ImRect rect = rectFromCircle(hp, config.draggerSize);
+        ImVec2 hp = handlePos(pos, thetaLen.x+startTheta, thetaLen.y);
+        ImRect rect = rectFromCircle(hp, config.draggerSize*0.8);
         
         ImGui::ItemSize(rect);
-        if(!ImGui::ItemAdd(rect, &id))
-            return false;
+        if(!ImGui::ItemAdd(rect, id))
+            return thetaLen;
         
         // Check hovered
-        const bool hovered = ImGui::IsHovered(rect, id);
+        const bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly); //rect, id);
         if (hovered)
         {
             ImGui::SetHoveredID(id);
@@ -244,7 +291,14 @@ namespace ui
         drawDragger(window, rect, clr);
         //window->DrawList->AddRectFilled(rect.Min, rect.Max, clr, config.rounding); //, rounding);
         
-        return ang;
+        return thetaLen;
+    }
+
+    float handle( int index, float ang, const ImVec2& pos, float length, float startTheta, float minTheta, float maxTheta, bool selected )
+    {
+        ImVec2 thetaLen=ImVec2(ang, length);
+        thetaLen = lengthHandle(index, thetaLen, startTheta, pos, ImVec2(minTheta, length), ImVec2(maxTheta, length), selected);
+        return thetaLen.x;
     }
     
     static ImVec2 operator *( float s, const ImVec2 &v ) { return ImVec2( v.x * s, v.y * s ); }
@@ -274,7 +328,7 @@ namespace ui
     }
     
     /// Affine transform widget
-    ui::Trans2d affineSimple( int index, ui::Trans2d t, bool selected )
+    ui::Trans2d affineSimple( int index, ui::Trans2d t, bool selected, float scale )
     {
         mod = false;
         
@@ -293,23 +347,42 @@ namespace ui
         // position
         t.pos = dragger(0, t.pos, selected, config.draggerSize ); pmod = modified();
         
+        bool shift = ImGui::GetIO().KeyShift;
+        bool alt = ImGui::GetIO().KeyAlt;
+
         // x axis
-        px = t.pos + t.x;
+        px = t.pos + t.x*scale;
         px = dragger(1, px, false, config.draggerSize*0.7 ); xmod = modified();
+        
+        ImVec2 tx = (px - t.pos)/scale;
+        float rx = norm(tx) / norm(t.x);
+
         if(xmod)
         {
-            t.x = px - t.pos;
+            t.x = (px - t.pos)/scale;
             t.y = forceOrtho(t.y, t.x, ImGui::GetIO().KeyAlt);
-            
+            if(shift)
+                t.y = t.y * rx;
+            if(alt)
+                t.y = (t.y / norm(t.y))*norm(tx);
         }
         
         // y axis
-        py = t.pos + t.y;
+        py = t.pos + t.y*scale;
         py = dragger(2, py, false, config.draggerSize*0.7 ); ymod = modified();
+
+        ImVec2 ty = (py - t.pos)/scale;
+        float ry = norm(ty) / norm(t.y);
+
         if(ymod)
         {
-            t.y = py - t.pos;
+            t.y = (py - t.pos)/scale;
             t.x = forceOrtho(t.x, t.y, ImGui::GetIO().KeyAlt);
+
+            if(shift)
+                t.x = t.x * ry;
+            if(alt)
+                t.x = (t.x / norm(t.x))*norm(t.y);
         }
         
         window->DrawList->AddLine(t.pos, px, config.lineColor);
@@ -362,18 +435,25 @@ namespace ui
     int toolbar( const std::string& title, const std::string& items, int selectedItem, bool horizontal, bool showAscii )
     {
         ImVec2 size;
-        if(horizontal)
-            size = ImVec2(iconSize*items.length(), iconSize);
-        else
-            size = ImVec2(iconSize,iconSize*items.length());
+        
 
         int flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
-        ImGui::PushID(title.c_str());
+        //ImGui::PushID(title.c_str());
+        //ImGui::SetNextWindowSize(size, ImGuiCond_Always);
         if(horizontal)
-            ImGui::Begin(title.c_str(), NULL, size, -1.0f, flags);
+            ImGui::Begin(title.c_str(), NULL, flags);
         else
-            ImGui::Begin("  ", NULL, size, -1.0f, flags);
+            ImGui::Begin("  ", NULL, flags);
         
+
+        ImVec2 padding = ImGui::GetStyle().FramePadding;
+        ImGuiWindow* win = ImGui::GetCurrentWindow();
+        if(horizontal)
+            size = ImVec2((iconSize+padding.x)*items.length(), iconSize + win->TitleBarHeight());
+        else
+            size = ImVec2(iconSize+padding.x*2,(iconSize+padding.y)*items.length());
+        ImGui::SetWindowSize(size, ImGuiCond_Always);
+
         ImGui::PushFont(iconFont);
     
         int sel = selectedItem;
@@ -397,7 +477,7 @@ namespace ui
         
         ImGui::PopFont();
         ImGui::End();
-        ImGui::PopID();
+        //ImGui::PopID();
         
         return sel;
     }
@@ -436,8 +516,8 @@ namespace ui
         p2 = ui::dragger( -101, p2);
         c1 = ui::dragger( -102, c1);
         c2 = ui::dragger( -103, c2);
-        ui::line(p1,c1);
-        ui::line(p2,c2);
+        ui::line(p1, c1);
+        ui::line(p2, c2);
         win->DrawList->AddBezierCurve(p1, c1, c2, p2, 0xffff0000, 2.);
 
         // Edit an angle (arc test)
@@ -451,7 +531,7 @@ namespace ui
         win->DrawList->PathLineTo(arcPos);
         //win->DrawList->PathLineTo(ui::handlePos(arcPos, angle, 100.));
         
-        win->DrawList->PathFill(0x66ff0000);
+        win->DrawList->PathFillConvex(0x66ff0000);
 
         // Affine transform test
         trans = ui::affineSimple(0, trans);
@@ -461,7 +541,7 @@ namespace ui
         win->DrawList->PathLineTo(trans.pos+trans.x);
         win->DrawList->PathLineTo(trans.pos+trans.x+trans.y);
         win->DrawList->PathLineTo(trans.pos+trans.y);
-        win->DrawList->PathFill(0x66ff0000);
+        win->DrawList->PathFillConvex(0x66ff0000);
 
         // Edit polyline 
         bool dragging = false;

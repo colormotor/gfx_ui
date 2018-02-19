@@ -22,6 +22,7 @@ int main(int, char**)
     glfwMakeContextCurrent(window);
 
     // Setup ImGui binding
+    ImGui::CreateContext();
     ImGui_ImplGlfw_Init(window, true);
 
     // Load Fonts
@@ -89,6 +90,7 @@ int main(int, char**)
 
     // Cleanup
     ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwTerminate();
 
     return 0;

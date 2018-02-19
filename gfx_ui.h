@@ -76,6 +76,7 @@ namespace ui
             hoverColor = 0xff0000ff;
             selectedColor = 0xff0044ff;
             color=0xff666666;
+            textColor=0xff333333;
         }
 
         float rounding;
@@ -84,6 +85,7 @@ namespace ui
         ImU32 hoverColor;
         ImU32 selectedColor;
         ImU32 color;
+        ImU32 textColor;
     };
     
     extern Config config;
@@ -107,6 +109,9 @@ namespace ui
     /// Will return true if the previous widget call has caught an interaction
     bool modified();
     
+    bool modifierShift();
+    bool modifierAlt();
+    
     /// Dragger widget
     ImVec2 dragger( int index, ImVec2 pos, bool selected=false, float size=-1. );
 
@@ -114,13 +119,19 @@ namespace ui
     void highlightDragger( const ImVec2& pos, float size=-1.  );
     
     /// Draw a line from a to b
-    void line( const ImVec2& a, const ImVec2& b );
+    void line( const ImVec2& a, const ImVec2& b, ImColor clr=ImColor(ImVec4(-1,-1,-1,1)) );
+
+    // Draw text string
+    void text( ImVec2 pos, const std::string& str, ImColor clr=ImColor(ImVec4(-1,-1,-1,1)) );
+
+    /// Angle and length handle widget
+    ImVec2 lengthHandle( int index, ImVec2 thetaLen, float startTheta, const ImVec2& pos, const ImVec2& minThetaLen, const ImVec2& maxThetaLen, bool selected=false );
 
     /// Angle handle widget
-    float handle( int index, float ang, const ImVec2& pos, float length, bool selected=false );
-    
+    float handle( int index, float ang, const ImVec2& pos, float length, float startTheta=0.0f, float minTheta=0.0f, float maxTheta=0.0f, bool selected=false );
+
     /// Simple affine transform widget (two axes, centered)
-    Trans2d affineSimple( int index, Trans2d m, bool selected=false );
+    Trans2d affineSimple( int index, Trans2d m, bool selected=false, float scale=1. );
     
     /// Creates a draggable rect for selection, see demo() for example usage
     Rect selector();
