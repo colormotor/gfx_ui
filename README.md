@@ -1,5 +1,5 @@
 # gfx_ui
-A minimal geometry editing UI based on [IMGUI] (https://github.com/ocornut/imgui). I started this project out of frustration after rewriting yet another retained mode geometry matipulation UI for a personal project.
+A minimal geometry editing UI based on [IMGUI] (https://github.com/ocornut/imgui). I started this project out of frustration after rewriting yet another retained mode geometry manipulation UI for a personal project.
 
 Currently handles these features:
 
